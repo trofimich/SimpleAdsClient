@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  push:
+  # branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1.0.5
+  
+    - name: setup-msbuild
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Restore Packages
+      run: nuget restore SimpleAdsClient.sln
+
+    - name: Build solution
+      run: msbuild SimpleAdsClient.sln -t:rebuild -property:Configuration=Release
+
+    - name: Create artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SimpleAdsClient
+        path: bin/Release/
